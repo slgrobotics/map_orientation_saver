@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>map_orientation_saver</name>
+  <version>0.1.0</version>
+  <description>Geographic map orientation estimation and Nav2 raster saving with orientation metadata.</description>
+  <maintainer email="slg@quakemap.com">Sergei Grichine</maintainer>
+  <license>Apache-2.0</license>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>tf2_ros_py</exec_depend>
+  <exec_depend>nav2_map_server</exec_depend>
+  <exec_depend>ros2cli</exec_depend>
+  <exec_depend>ros2run</exec_depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
+  <test_depend>python3-pytest</test_depend>
+  <test_depend>geometry_msgs</test_depend>
+  <test_depend>builtin_interfaces</test_depend>
+  <export><build_type>ament_python</build_type></export>
+</package>

@@ -49,3 +49,12 @@ qtcreator-*
 
 # Catkin custom files
 CATKIN_IGNORE
+
+# ROS 2 / Python build and test output
+install/
+log/
+__pycache__/
+.pytest_cache/
+*.egg-info/
+.coverage
+htmlcov/

@@ -1,0 +1,8 @@
+map_orientation_saver
+Copyright 2026 Sergei Grichine
+
+The estimator, circular orientation math, Nav2 saver wrapper, configuration,
+and behavior tests are part of a larger articubot_one project.
+See https://github.com/slgrobotics/articubot_one/wiki
+
+This package is independently usable and has no articubot_one dependency.

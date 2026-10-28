@@ -1,0 +1,6 @@
+# Explicitly opt into true ENU only when the simulated IMU actually provides it.
+/**/map_orientation_node:
+  ros__parameters:
+    heading_reference: "true_enu"
+    magnetic_declination_degrees: 0.0
+    yaw_offset: 0.0

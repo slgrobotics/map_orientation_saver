@@ -1,0 +1,19 @@
+/**/map_orientation_node:
+  ros__parameters:
+    imu_topic: "imu/data"
+    map_frame: "map"
+    robot_frame: "base_link"
+    # IMU orientation MUST use ENU (yaw zero East, CCW positive).
+    # A gyro-only/relative orientation is not a geographic heading source.
+    heading_reference: "magnetic"
+    #magnetic_declination_degrees: .nan   # Unknown -> explicitly unavailable.
+    magnetic_declination_degrees: 4.1833  # For lat/long of Childersburg, Alabama, USA
+    yaw_offset: 0.0  # Heading convention correction, not IMU mounting (TF handles mounting).
+    max_age: 1.0
+    sample_interval: 0.2
+    window_seconds: 30.0
+    min_samples: 20
+    reset_jump_degrees: 25.0
+    max_uncertainty_degrees: 20.0
+    # For drivers reporting unknown (all-zero) orientation covariance.
+    assumed_imu_uncertainty_degrees: 15.0
