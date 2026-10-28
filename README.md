@@ -246,6 +246,10 @@ orientation:
   # Plus source timestamps, frames, sample count, and diagnostic metadata.
 ```
 
+Sidecars inherit the saved map YAML's access permissions before atomic
+replacement (for example, `0664` when the YAML is group-writable). Resaving also
+updates the permissions of an older sidecar.
+
 These values are examples. Sidecars are replaced atomically and tied to both
 map files by content hash, matching the Wi-Fi V2 hash convention. Consumers
 must verify that hash before use and account for the raster origin yaw when

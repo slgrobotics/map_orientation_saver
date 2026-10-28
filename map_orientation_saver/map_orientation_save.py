@@ -30,6 +30,7 @@ import json
 import math
 import os
 import signal
+import stat
 from pathlib import Path
 import subprocess
 import sys
@@ -77,6 +78,8 @@ def write_sidecar(map_yaml, estimate, reason=''):
     Read/hash both raster files first, then write and fsync a temporary YAML
     in the same directory before replacement. Failed validation leaves an
     existing sidecar untouched; a successful write replaces old metadata.
+    The temporary file inherits the map YAML's access permissions before the
+    atomic rename, so group/other readers see the same access as the map.
     """
     path = Path(map_yaml)
     fingerprint, settings = map_fingerprint(path)
@@ -92,6 +95,9 @@ def write_sidecar(map_yaml, estimate, reason=''):
             temp = Path(stream.name)
             yaml.safe_dump(body,stream,sort_keys=False)
             stream.flush()
+            # NamedTemporaryFile starts at 0600 regardless of the map/umask.
+            # Copy ordinary access bits, without propagating special mode bits.
+            os.fchmod(stream.fileno(), stat.S_IMODE(path.stat().st_mode) & 0o777)
             os.fsync(stream.fileno())
         os.replace(temp,sidecar)
     finally:

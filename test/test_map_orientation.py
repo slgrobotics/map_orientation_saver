@@ -379,3 +379,45 @@ def test_estimator_releases_context_if_initialization_fails():
         with pytest.raises(ValueError, match='bad parameters'):
             module.main()
     shutdown.assert_called_once()
+
+
+@pytest.mark.parametrize('mode', [0o664, 0o644, 0o640, 0o600, 0o444])
+def test_sidecar_matches_map_access_permissions_before_atomic_replace(tmp_path, mode):
+    import os
+    import stat
+    from map_orientation_saver import map_orientation_save as module
+    path = map_files(tmp_path)
+    path.chmod(mode)
+    original_replace = os.replace
+    def replace(source, destination):
+        assert stat.S_IMODE(Path(source).stat().st_mode) == mode
+        return original_replace(source, destination)
+    previous_umask = os.umask(0o077)
+    try:
+        with patch.object(module.os, 'replace', side_effect=replace):
+            sidecar = write_sidecar(path, estimate())
+    finally:
+        os.umask(previous_umask)
+    assert stat.S_IMODE(sidecar.stat().st_mode) == mode
+
+
+def test_replacing_private_sidecar_updates_permissions_to_match_map(tmp_path):
+    import stat
+    path = map_files(tmp_path)
+    path.chmod(0o600)
+    sidecar = write_sidecar(path, estimate())
+    path.chmod(0o664)
+    write_sidecar(path, estimate())
+    assert stat.S_IMODE(sidecar.stat().st_mode) == 0o664
+
+
+def test_permission_failure_keeps_old_sidecar_and_removes_temporary_file(tmp_path):
+    from map_orientation_saver import map_orientation_save as module
+    path = map_files(tmp_path)
+    sidecar = write_sidecar(path, estimate())
+    original = sidecar.read_bytes()
+    with patch.object(module.os, 'fchmod', side_effect=OSError('permissions failed')):
+        with pytest.raises(OSError, match='permissions failed'):
+            write_sidecar(path, None, 'unavailable')
+    assert sidecar.read_bytes() == original
+    assert not list(tmp_path.glob('.*.tmp'))
