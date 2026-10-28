@@ -34,6 +34,7 @@ import math
 import uuid
 
 import rclpy
+from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data, QoSProfile, DurabilityPolicy
 from rclpy.time import Time
@@ -248,7 +249,13 @@ def main(args=None):
     try:
         node = MapOrientationNode()
         rclpy.spin(node)
+    except (KeyboardInterrupt, ExternalShutdownException):
+        # Ctrl+C and a context stopped by ROS launch are normal shutdown paths.
+        pass
     finally:
-        if node is not None:
-            node.destroy_node()
-        rclpy.shutdown()
+        try:
+            if node is not None:
+                node.destroy_node()
+        finally:
+            # ROS signal handling may already have shut down this context.
+            rclpy.try_shutdown()

@@ -107,10 +107,11 @@ ros2 run map_orientation_saver map_orientation_node --ros-args \
 When including the launch from another project, pass only the namespace and
 configuration appropriate to that project. If including it inside an existing
 namespace group, leave `namespace` empty to avoid applying the namespace twice.
-Do not run the old and new estimator together in the same namespace. Existing
-`articubot_one` bringup can be started with
-`use_map_orientation_estimator:=false` when independently testing this package;
-no integration changes to that repository are part of this package.
+Do not run two estimators together in the same namespace. `articubot_one`
+localizers now launch this package through their robot-specific adapter. Set
+`use_map_orientation_estimator:=false` on robot bringup when independently
+starting another estimator in the same namespace. Other projects can include
+the generic launch directly; robot-specific defaults remain their responsibility.
 
 ## Simulation
 

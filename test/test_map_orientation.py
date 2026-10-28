@@ -341,3 +341,41 @@ def test_recovery_and_clock_reset_discard_pending_samples():
     MapOrientationNode._recovery(node,SimpleNamespace(data=True))
     assert not node.pending
     assert node.last_enqueued is None
+
+
+@pytest.mark.parametrize('interrupted', [False, True, 'external'])
+def test_estimator_exits_quietly_and_cleans_up_on_normal_shutdown(interrupted):
+    from map_orientation_saver import map_orientation_node as module
+    node = Mock()
+    error = (KeyboardInterrupt() if interrupted is True else
+             module.ExternalShutdownException() if interrupted == 'external' else None)
+    with patch.object(module.rclpy, 'init'), \
+         patch.object(module, 'MapOrientationNode', return_value=node), \
+         patch.object(module.rclpy, 'spin', side_effect=error), \
+         patch.object(module.rclpy, 'try_shutdown') as shutdown:
+        module.main()
+    node.destroy_node.assert_called_once()
+    shutdown.assert_called_once()
+
+
+def test_estimator_does_not_hide_unexpected_errors():
+    from map_orientation_saver import map_orientation_node as module
+    node = Mock()
+    with patch.object(module.rclpy, 'init'), \
+         patch.object(module, 'MapOrientationNode', return_value=node), \
+         patch.object(module.rclpy, 'spin', side_effect=RuntimeError('unexpected')), \
+         patch.object(module.rclpy, 'try_shutdown') as shutdown:
+        with pytest.raises(RuntimeError, match='unexpected'):
+            module.main()
+    node.destroy_node.assert_called_once()
+    shutdown.assert_called_once()
+
+
+def test_estimator_releases_context_if_initialization_fails():
+    from map_orientation_saver import map_orientation_node as module
+    with patch.object(module.rclpy, 'init'), \
+         patch.object(module, 'MapOrientationNode', side_effect=ValueError('bad parameters')), \
+         patch.object(module.rclpy, 'try_shutdown') as shutdown:
+        with pytest.raises(ValueError, match='bad parameters'):
+            module.main()
+    shutdown.assert_called_once()
